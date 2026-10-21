@@ -1,3 +1,4 @@
+[hidden]{display:none!important}
 /* Layout: retail storefront. Header (logo · search · my car · cart) → hero search card (VIN / car / part no.) → categories → products.
    After a car is set, the page becomes that car's catalogue: garage bar → categories with counts → matching parts only. */
 :root{color-scheme:light;
