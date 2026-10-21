@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>طلبي | عزم المتحدة</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
+</head>
+<body>
+<header class="hdr"><div class="wrap"><a class="logo" href="/" style="text-decoration:none;color:var(--ink)"><i>ع</i><span class="sname">عزم المتحدة</span></a><a class="ibtn" href="/" style="margin-inline-start:auto">المتجر</a></div></header>
+<main class="wrap page" id="main">
+ <div class="card" id="lookup" hidden>
+  <h1>تتبّع طلبك</h1>
+  <p style="color:var(--mut);margin:0 0 14px">اكتب رقم الطلب ورقم الجوال المستخدم فيه.</p>
+  <form class="form2" id="lf" style="max-width:460px">
+   <label class="fld">رقم الطلب<input id="ln" inputmode="numeric" placeholder="1001" dir="ltr" style="text-align:right"></label>
+   <label class="fld">رقم الجوال<input id="lp" inputmode="tel" placeholder="05XXXXXXXX" dir="ltr" style="text-align:right"></label>
+   <button class="btn pri" type="submit">عرض الطلب</button>
+   <div class="err" id="lerr" hidden></div>
+  </form>
+  <div id="mine" style="margin-top:16px"></div>
+ </div>
+ <div id="view" hidden></div>
+</main>
+<script src="/assets/common.js"></script>
+<script>
+(async () => {
+  const { ls, api, settings, config, esc, fmt, TL, STATUS, waLink } = AZM;
+  const $ = (s) => document.querySelector(s);
+  const qs = new URLSearchParams(location.search);
+  const S = await settings().catch(() => ({}));
+  const store = S.store || {};
+  document.querySelectorAll(".sname").forEach((e) => (e.textContent = store.name || "عزم المتحدة"));
+
+  function showLookup() {
+    $("#lookup").hidden = false; $("#view").hidden = true;
+    const mine = ls.get("orders", []);
+    if (mine.length) $("#mine").innerHTML = '<h3 style="font-size:16px;margin-bottom:8px">طلباتك من هذا الجهاز</h3><div class="pills">' + mine.map((o) => `<a class="pill" href="/order?n=${o.n}&t=${encodeURIComponent(o.t)}" style="text-decoration:none;color:inherit">#${o.n}</a>`).join("") + "</div>";
+  }
+  $("#lf").addEventListener("submit", async (e) => {
+    e.preventDefault(); $("#lerr").hidden = true;
+    try { const o = await api(`/api/order?n=${encodeURIComponent($("#ln").value)}&phone=${encodeURIComponent($("#lp").value)}`); history.replaceState(null, "", `/order?n=${o.number}&t=${o.token}`); render(o); }
+    catch (x) { $("#lerr").textContent = x.message; $("#lerr").hidden = false; }
+  });
+
+  const FLOW = ["paid", "confirmed", "processing", "shipped", "delivered"];
+  const FLOW_COD = ["cod", "confirmed", "processing", "shipped", "delivered"];
+  const LABEL = { paid: "تم الدفع", cod: "تم استلام الطلب", confirmed: "تأكدنا من التوافق", processing: "قيد التجهيز", shipped: "تم الشحن", delivered: "تم التسليم" };
+
+  async function render(o) {
+    $("#lookup").hidden = true; const v = $("#view"); v.hidden = false;
+    const flow = o.payment_method === "cod" ? FLOW_COD : FLOW;
+    const idx = flow.indexOf(o.status);
+    const failed = qs.get("pay") === "failed";
+    const isNew = qs.get("new") === "1" || (qs.get("pay") === "1" && o.status !== "pending_payment");
+    const wa = store.whatsapp ? waLink(store.whatsapp, `السلام عليكم، بخصوص طلبي رقم ${o.number}`) : "";
+    v.innerHTML = `
+    <h1>طلب رقم <span class="mono">#${o.number}</span></h1>
+    <p style="color:var(--mut);margin:0 0 16px">${new Date(o.created_at).toLocaleString("ar-SA-u-nu-latn", { dateStyle: "medium", timeStyle: "short" })} · ${esc(STATUS[o.status] || o.status)}</p>
+    ${isNew ? `<div class="ok-box" style="margin-bottom:16px"><b>وصلنا طلبك، شكراً لك.</b> نراجع توافق القطع مع سيارتك ونتواصل معك على جوالك. احفظ هذه الصفحة لتتابع طلبك.</div>` : ""}
+    ${failed ? `<div class="err" style="margin-bottom:16px">لم يكتمل الدفع${qs.get("msg") ? ": " + esc(qs.get("msg")) : ""}. تقدر تحاول مرة ثانية من الأسفل.</div>` : ""}
+    <div class="grid2">
+     <div class="form2">
+      ${o.status === "pending_payment" ? `<div class="card"><h2 style="font-size:18px;margin-bottom:4px">ادفع ${fmt(o.total)} ر.س</h2><p class="hint" style="margin-bottom:12px">دفع آمن عبر Moyasar. لا نحفظ بيانات بطاقتك.</p><div class="mysr-form" id="mysr"></div></div>` : ""}
+      ${["cancelled", "refunded"].includes(o.status) ? `<div class="err">${o.status === "cancelled" ? "تم إلغاء هذا الطلب." : "تم استرجاع مبلغ هذا الطلب."} للاستفسار تواصل معنا.</div>` :
+      o.status !== "pending_payment" ? `<div class="card"><h2 style="font-size:18px;margin-bottom:12px">حالة الطلب</h2><ol class="timeline">${flow.map((s, i) => `<li class="${i < idx ? "done" : i === idx ? "done now" : ""}"><span>${LABEL[s]}</span></li>`).join("")}</ol>
+       ${o.tracking_no ? `<div class="ok-box" style="margin-top:4px">شركة الشحن: <b>${esc(o.carrier || "-")}</b><br>رقم التتبع: <b class="mono ltr">${esc(o.tracking_no)}</b>${o.tracking_url ? `<br><a href="${esc(o.tracking_url)}" target="_blank" rel="noopener">تتبّع الشحنة</a>` : ""}</div>` : ""}</div>` : ""}
+      ${wa ? `<a class="btn wa" href="${wa}" target="_blank" rel="noopener">تواصل معنا على واتساب</a>` : ""}
+     </div>
+     <aside class="card">
+      <h2 style="font-size:18px;margin-bottom:10px">القطع</h2>
+      ${o.items.map((i) => `<div class="sumrow"><span>${esc(i.name)} <small style="color:var(--mut)">× ${i.qty} · ${TL[i.type] || ""}</small><br><small class="mono ltr" style="color:var(--mut)">${esc(i.part_no)}</small></span><b>${fmt(i.unit_price * i.qty)}</b></div>`).join("")}
+      <div class="sumrow" style="border-top:1px solid var(--line);margin-top:8px;padding-top:10px"><span>المجموع</span><b>${fmt(o.subtotal)} ر.س</b></div>
+      <div class="sumrow"><span>${o.delivery === "pickup" ? "استلام من المحل" : "الشحن إلى " + esc(o.city)}</span><b>${Number(o.shipping_fee) ? fmt(o.shipping_fee) + " ر.س" : "مجاني"}</b></div>
+      <div class="sumrow big"><span>الإجمالي</span><b>${fmt(o.total)} ر.س</b></div>
+      <p class="hint">${o.payment_method === "cod" ? "الدفع عند الاستلام" : "دفع إلكتروني"}${o.vehicle ? " · " + esc(o.vehicle) : ""}</p>
+     </aside>
+    </div>`;
+    if (o.status === "pending_payment") startPayment(o);
+  }
+
+  function loadMoyasar() {
+    return new Promise((ok, no) => { if (window.Moyasar) return ok(); const s = document.createElement("script"); s.src = "https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  }
+  async function startPayment(o) {
+    try {
+      const c = await config();
+      if (!c.moyasarPublishableKey) { $("#mysr").innerHTML = '<p class="err">الدفع الإلكتروني غير مفعّل بعد. تواصل معنا لإكمال الطلب.</p>'; return; }
+      await loadMoyasar();
+      const methods = ["creditcard", "stcpay"]; if (c.applePay) methods.push("applepay");
+      Moyasar.init({
+        element: ".mysr-form",
+        amount: Math.round(Number(o.total) * 100),
+        currency: "SAR",
+        description: `طلب #${o.number} - ${store.name || "عزم المتحدة"}`,
+        publishable_api_key: c.moyasarPublishableKey,
+        callback_url: `${location.origin}/api/payment-callback`,
+        methods,
+        supported_networks: ["mada", "visa", "mastercard"],
+        metadata: { order_id: o.id, order_number: String(o.number) },
+        language: "ar",
+        fixed_width: false,
+        ...(c.applePay ? { apple_pay: { country: "SA", label: store.name || "عزم المتحدة", validate_merchant_url: "https://api.moyasar.com/v1/applepay/initiate" } } : {}),
+      });
+    } catch (e) { $("#mysr").innerHTML = '<p class="err">تعذّر تحميل نموذج الدفع. حدّث الصفحة.</p>'; }
+  }
+
+  const n = qs.get("n"), t = qs.get("t");
+  if (!n || !t) return showLookup();
+  try { render(await api(`/api/order?n=${encodeURIComponent(n)}&t=${encodeURIComponent(t)}`)); }
+  catch (e) { showLookup(); $("#lerr").textContent = e.message; $("#lerr").hidden = false; }
+})();
+</script>
+</body>
+</html>

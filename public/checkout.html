@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>إتمام الطلب | عزم المتحدة</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<header class="hdr"><div class="wrap"><a class="logo" href="/" style="text-decoration:none;color:var(--ink)"><i>ع</i><span class="sname">عزم المتحدة</span></a><span style="margin-inline-start:auto;color:var(--mut);font-size:14px">دفع آمن</span></div></header>
+<main class="wrap page">
+ <h1>إتمام الطلب</h1>
+ <p style="color:var(--mut);margin:0 0 18px">نراجع التوافق مع سيارتك قبل الشحن، ونتواصل معك إذا احتجنا أي تأكيد.</p>
+ <div id="err" class="err" hidden style="margin-bottom:14px"></div>
+ <div class="grid2">
+  <form class="card form2" id="f" novalidate>
+   <h2 style="font-size:18px">بياناتك</h2>
+   <div class="row2">
+    <label class="fld">الاسم<input id="name" autocomplete="name" required></label>
+    <label class="fld">رقم الجوال<input id="phone" inputmode="tel" autocomplete="tel" placeholder="05XXXXXXXX" dir="ltr" style="text-align:right" required></label>
+   </div>
+   <h2 style="font-size:18px;margin-top:6px">الاستلام</h2>
+   <div class="choice" id="deliv">
+    <label><input type="radio" name="delivery" value="ship" checked><span>توصيل لعنوانك<small id="shipNote">الرسوم حسب المدينة</small></span></label>
+    <label id="pickupOpt" hidden><input type="radio" name="delivery" value="pickup"><span id="pickupLbl">استلام من المحل<small>بدون رسوم شحن</small></span></label>
+   </div>
+   <div class="row2">
+    <label class="fld">المدينة<select id="city" required></select></label>
+    <label class="fld" id="otherCityF" hidden>اسم المدينة<input id="otherCity"></label>
+   </div>
+   <label class="fld" id="addrF">العنوان<textarea id="address" rows="2" placeholder="الحي، الشارع، رقم المبنى أو العنوان الوطني المختصر"></textarea></label>
+   <h2 style="font-size:18px;margin-top:6px">سيارتك</h2>
+   <div class="row2">
+    <label class="fld">رقم الهيكل (VIN)<input id="vin" maxlength="17" dir="ltr" style="text-align:left;font-family:var(--f-mono);text-transform:uppercase" placeholder="17 خانة"><small>نطابق القطع معه قبل الشحن</small></label>
+    <label class="fld">السيارة<input id="vehicle" placeholder="مثل: هونداي النترا 2021"></label>
+   </div>
+   <label class="fld">ملاحظات (اختياري)<textarea id="note" rows="2"></textarea></label>
+   <h2 style="font-size:18px;margin-top:6px">طريقة الدفع</h2>
+   <div class="choice" id="pay"></div>
+   <button class="btn pri" id="submit" type="submit" style="padding:14px;font-size:16px">تأكيد الطلب</button>
+   <p class="hint" style="text-align:center">بالضغط على «تأكيد الطلب» توافق على مراجعتنا للتوافق قبل الشحن.</p>
+  </form>
+  <aside class="card" id="sum"><p style="color:var(--mut)">جاري تحميل السلة…</p></aside>
+ </div>
+</main>
+<script src="/assets/common.js"></script>
+<script>
+(async () => {
+  const { ls, sb, settings, api, esc, fmt, TL } = AZM;
+  const $ = (s) => document.querySelector(s);
+  const cart = ls.get("cart", {});
+  const parts = Object.keys(cart);
+  if (!parts.length) { $("#sum").innerHTML = '<h3>السلة فاضية</h3><p><a href="/">ارجع للمتجر</a></p>'; $("#f").hidden = true; return; }
+  let S, rows;
+  try {
+    [S, rows] = await Promise.all([
+      settings(),
+      sb(`store_products?select=part_no,name,type,stock,price,image_url&part_no=in.(${encodeURIComponent(parts.map((p) => `"${p}"`).join(","))})`),
+    ]);
+  } catch (e) { $("#sum").innerHTML = '<p class="err">تعذّر تحميل السلة. حدّث الصفحة.</p>'; return; }
+  const store = S.store || {}, ship = S.shipping || {};
+  document.querySelectorAll(".sname").forEach((e) => (e.textContent = store.name || "عزم المتحدة"));
+  const items = rows.filter((r) => r.stock > 0 && Number(r.price) > 0).map((r) => ({ ...r, qty: cart[r.part_no] }));
+
+  // المدن ورسوم الشحن
+  const cities = Object.keys(ship.cities || {});
+  $("#city").innerHTML = '<option value="">اختر المدينة</option>' + cities.map((c) => `<option>${esc(c)}</option>`).join("") + '<option value="__other">مدينة أخرى</option>';
+  if (ship.pickup_enabled) { $("#pickupOpt").hidden = false; $("#pickupLbl").firstChild.textContent = ship.pickup_label || "استلام من المحل"; }
+  if (ship.free_over) $("#shipNote").textContent = `الرسوم حسب المدينة · مجاني للطلبات فوق ${fmt(ship.free_over)} ر.س`;
+
+  // طرق الدفع
+  const methods = [];
+  if (store.card_enabled !== false) methods.push(["card", "الدفع الإلكتروني", "مدى، فيزا، ماستركارد، STC Pay"]);
+  if (store.cod_enabled) methods.push(["cod", "الدفع عند الاستلام", "تدفع للمندوب أو في المحل"]);
+  $("#pay").innerHTML = methods.map(([v, t, s], i) => `<label><input type="radio" name="pm" value="${v}" ${i ? "" : "checked"}><span>${t}<small>${s}</small></span></label>`).join("");
+
+  const V = ls.get("vehicle", null);
+  if (V) { $("#vin").value = V.vin || ""; $("#vehicle").value = `${V.car}${V.yr ? " " + V.yr : ""}`; }
+  const saved = ls.get("customer", {});
+  ["name", "phone", "address"].forEach((k) => saved[k] && ($("#" + k).value = saved[k]));
+  if (saved.city) $("#city").value = cities.includes(saved.city) ? saved.city : "";
+
+  const delivery = () => document.querySelector('input[name="delivery"]:checked').value;
+  const cityVal = () => ($("#city").value === "__other" ? $("#otherCity").value.trim() : $("#city").value);
+  function fee(sub) {
+    if (delivery() === "pickup") return 0;
+    if (ship.free_over && sub >= ship.free_over) return 0;
+    const c = cityVal();
+    if (!c) return null;
+    return ship.cities && ship.cities[c] != null ? Number(ship.cities[c]) : Number(ship.default_fee) || 0;
+  }
+  function drawSum() {
+    const sub = items.reduce((a, i) => a + Number(i.price) * i.qty, 0);
+    const f = fee(sub);
+    const dropped = parts.length - items.length;
+    $("#sum").innerHTML = `<h2 style="font-size:18px;margin-bottom:10px">طلبك (${items.reduce((a, i) => a + i.qty, 0)} قطعة)</h2>
+    ${items.map((i) => `<div class="sumrow"><span>${esc(i.name)} <small style="color:var(--mut)">× ${i.qty} · ${TL[i.type]}</small></span><b>${fmt(i.price * i.qty)}</b></div>`).join("")}
+    ${dropped ? `<p class="err" style="margin:8px 0">${dropped} قطعة في سلتك لم تعد متوفرة وحذفناها من الطلب.</p>` : ""}
+    <div class="sumrow" style="border-top:1px solid var(--line);margin-top:8px;padding-top:10px"><span>المجموع</span><b>${fmt(sub)} ر.س</b></div>
+    <div class="sumrow"><span>الشحن</span><b>${f === null ? "اختر المدينة" : f === 0 ? "مجاني" : fmt(f) + " ر.س"}</b></div>
+    <div class="sumrow big"><span>الإجمالي</span><b>${fmt(sub + (f || 0))} ر.س</b></div>
+    <p class="hint">${store.vat_included ? "الأسعار شاملة ضريبة القيمة المضافة." : ""} <a href="/">تعديل السلة</a></p>`;
+  }
+  drawSum();
+  if (!items.length) { $("#f").hidden = true; return; }
+  $("#city").addEventListener("change", () => { $("#otherCityF").hidden = $("#city").value !== "__other"; drawSum(); });
+  $("#otherCity").addEventListener("input", drawSum);
+  $("#deliv").addEventListener("change", () => { const p = delivery() === "pickup"; $("#addrF").hidden = p; drawSum(); });
+
+  $("#f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#err"); err.hidden = true;
+    const body = {
+      name: $("#name").value, phone: $("#phone").value, city: cityVal() || (delivery() === "pickup" ? "استلام" : ""),
+      address: $("#address").value, delivery: delivery(), vin: $("#vin").value, vehicle: $("#vehicle").value, note: $("#note").value,
+      payment_method: (document.querySelector('input[name="pm"]:checked') || {}).value || "card",
+      items: items.map((i) => ({ part_no: i.part_no, qty: i.qty })),
+    };
+    const btn = $("#submit"); btn.disabled = true; btn.textContent = "جاري إنشاء الطلب…";
+    try {
+      const o = await api("/api/checkout", { method: "POST", body: JSON.stringify(body) });
+      ls.set("customer", { name: body.name, phone: body.phone, address: body.address, city: body.city });
+      ls.set("cart", {});
+      const orders = ls.get("orders", []); orders.unshift({ n: o.number, t: o.token }); ls.set("orders", orders.slice(0, 20));
+      location.href = `/order?n=${o.number}&t=${o.token}${o.method === "card" ? "&pay=1" : "&new=1"}`;
+    } catch (x) {
+      err.textContent = x.message; err.hidden = false; err.scrollIntoView({ behavior: "smooth", block: "center" });
+      btn.disabled = false; btn.textContent = "تأكيد الطلب";
+    }
+  });
+})();
+</script>
+</body>
+</html>

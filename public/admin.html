@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>لوحة التحكم | عزم المتحدة</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body>
+<section id="login" class="login" hidden>
+ <form class="card form2" id="lf">
+  <div class="logo"><i>ع</i><span>لوحة التحكم</span></div>
+  <label class="fld">كلمة المرور<input type="password" id="pw" autocomplete="current-password" required></label>
+  <button class="btn pri" type="submit">دخول</button>
+  <div class="err" id="lerr" hidden></div>
+ </form>
+</section>
+
+<div id="app" class="app" hidden>
+ <aside class="side">
+  <div class="logo"><i>ع</i><span id="sn">عزم المتحدة</span></div>
+  <nav id="nav">
+   <button type="button" data-tab="home">الرئيسية</button>
+   <button type="button" data-tab="orders">الطلبات <b id="openBadge" hidden></b></button>
+   <button type="button" data-tab="products">الأصناف</button>
+   <button type="button" data-tab="import">رفع تقرير المخزون</button>
+   <button type="button" data-tab="settings">الإعدادات</button>
+  </nav>
+  <div class="side-foot"><a href="/" target="_blank" rel="noopener">فتح المتجر ↗</a><button type="button" id="logout" class="linkb">خروج</button></div>
+ </aside>
+ <main class="main">
+  <!-- الرئيسية -->
+  <section data-pane="home">
+   <h1>الرئيسية</h1>
+   <div class="kpis" id="kpis"></div>
+   <div class="card"><div class="sech" style="margin-bottom:6px"><h2 style="font-size:17px">المبيعات آخر 14 يوم</h2><span id="chartCap"></span></div><div class="bars" id="bars"></div></div>
+   <div class="card" style="margin-top:14px"><div class="sech" style="margin-bottom:6px"><h2 style="font-size:17px">طلبات تحتاج إجراء</h2><button class="linkb" type="button" data-go="orders">كل الطلبات</button></div><div id="homeOrders"></div></div>
+  </section>
+
+  <!-- الطلبات -->
+  <section data-pane="orders" hidden>
+   <div class="head"><h1>الطلبات</h1><input class="in" id="oq" type="search" placeholder="رقم الطلب، الاسم، الجوال، أو رقم الهيكل"></div>
+   <div class="pills" id="ofilter"></div>
+   <div id="olist" class="list"></div>
+   <div class="pager" id="opager"></div>
+  </section>
+
+  <!-- الأصناف -->
+  <section data-pane="products" hidden>
+   <div class="head"><h1>الأصناف</h1><input class="in" id="pq" type="search" placeholder="اسم القطعة أو رقمها"><button class="btn pri" type="button" id="newProd">إضافة صنف</button></div>
+   <div class="row-f">
+    <select class="in" id="pfilter"><option value="">كل الأصناف</option><option value="out">غير متوفرة</option><option value="noprice">بدون سعر</option><option value="noimage">بدون صورة</option><option value="hidden">مخفية من المتجر</option></select>
+    <select class="in" id="pcat"><option value="">كل الأقسام</option></select>
+    <span id="pcount" class="muted"></span>
+   </div>
+   <div class="tbl-wrap"><table class="tbl" id="ptbl"></table></div>
+   <div class="pager" id="ppager"></div>
+  </section>
+
+  <!-- رفع المخزون -->
+  <section data-pane="import" hidden>
+   <h1>رفع تقرير المخزون</h1>
+   <p class="muted">ارفع تقرير المخزون (Excel أو CSV). نحدّث الكمية وسعر الجملة للأصناف الموجودة، ونضيف الجديدة ونصنّفها تلقائياً (النوع من آخر حرف في الرقم، والقسم والسيارة والسنة من الاسم). الأصناف غير الموجودة في التقرير لا تتغير. إذا تكرر الصنف في أكثر من مخزن نجمع الكميات.</p>
+   <div class="card form2">
+    <label class="fld">الملف<input type="file" id="file" accept=".xls,.xlsx,.csv"></label>
+    <div id="map" hidden>
+     <div class="row4">
+      <label class="fld">عمود رقم القطعة<select id="cPart"></select></label>
+      <label class="fld">عمود اسم الصنف<select id="cName"></select></label>
+      <label class="fld">عمود الكمية<select id="cQty"></select></label>
+      <label class="fld">عمود سعر الجملة (القيمة)<select id="cVal"></select></label>
+     </div>
+     <div class="tbl-wrap" style="margin-top:10px"><table class="tbl" id="prev"></table></div>
+     <p class="muted" id="icount"></p>
+     <button class="btn pri" type="button" id="doImport">دمج التقرير مع المخزون</button>
+    </div>
+    <div id="ires"></div>
+   </div>
+  </section>
+
+  <!-- الإعدادات -->
+  <section data-pane="settings" hidden>
+   <h1>الإعدادات</h1>
+   <form class="form2" id="sf">
+    <div class="card form2">
+     <h2 style="font-size:17px">المتجر</h2>
+     <div class="row2">
+      <label class="fld">اسم المتجر<input id="s_name"></label>
+      <label class="fld">رقم الواتساب<input id="s_wa" dir="ltr" placeholder="9665XXXXXXXX" style="text-align:right"><small>بالصيغة الدولية بدون + وبدون صفر البداية</small></label>
+     </div>
+     <div class="row2">
+      <label class="fld">نسبة الربح فوق سعر الجملة (%)<input id="s_markup" type="number" min="0" max="500" step="0.5"><small>تُطبّق على كل صنف ليس له سعر يدوي</small></label>
+      <label class="fld">تقريب السعر<select id="s_round"><option value="1">لأقرب ريال</option><option value="5">لأقرب 5 ريالات</option><option value="10">لأقرب 10 ريالات</option></select></label>
+     </div>
+     <label class="sw"><input type="checkbox" id="s_vat">الأسعار شاملة ضريبة القيمة المضافة</label>
+     <label class="sw"><input type="checkbox" id="s_card">تفعيل الدفع الإلكتروني (Moyasar)</label>
+     <label class="sw"><input type="checkbox" id="s_cod">تفعيل الدفع عند الاستلام</label>
+    </div>
+    <div class="card form2">
+     <h2 style="font-size:17px">الشحن</h2>
+     <div class="row2">
+      <label class="fld">رسوم الشحن الافتراضية (ر.س)<input id="h_def" type="number" min="0"><small>للمدن غير الموجودة في القائمة</small></label>
+      <label class="fld">شحن مجاني للطلبات فوق (ر.س)<input id="h_free" type="number" min="0"><small>اكتب 0 لإيقافه</small></label>
+     </div>
+     <div class="row2">
+      <label class="sw"><input type="checkbox" id="h_pick">السماح بالاستلام من المحل</label>
+      <label class="fld">نص الاستلام<input id="h_plbl" placeholder="استلام من المحل — الرياض، حي ..."></label>
+     </div>
+     <h3 style="font-size:15px;margin-top:4px">رسوم كل مدينة</h3>
+     <div id="cities" class="cities"></div>
+     <button class="btn" type="button" id="addCity">إضافة مدينة</button>
+    </div>
+    <button class="btn pri" type="submit" style="justify-self:start;padding:12px 26px">حفظ الإعدادات</button>
+   </form>
+  </section>
+ </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer wide" id="drawer" hidden role="dialog" aria-modal="true"><div class="dh"><h2 id="dt"></h2><button class="x" type="button" data-close aria-label="إغلاق">✕</button></div><div class="db" id="dbody"></div></aside>
+<div id="toast" role="status"></div>
+<script src="/assets/common.js"></script>
+<script src="/assets/admin.js"></script>
+</body>
+</html>

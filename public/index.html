@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>عزم المتحدة | قطع غيار هونداي وكيا</title>
+<meta name="description" content="قطع غيار هونداي وكيا الأصلية والبديلة. ابحث برقم الهيكل واعرض القطع المطابقة لسيارتك، وقارن بين الوكالة والموبس والتجاري بالسعر.">
+<meta name="theme-color" content="#0d7a5f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div dir="rtl" lang="ar">
+<header class="hdr"><div class="wrap">
+ <button class="logo" type="button" id="home"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></i><span id="sname">عزم المتحدة</span></button>
+ <label class="hsearch"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="ابحث باسم القطعة أو رقمها" autocomplete="off" aria-autocomplete="list"><div class="sugg" id="sugg" hidden role="listbox"></div></label>
+ <button class="ibtn mycarbtn" type="button" id="mycarBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v4H3z"/><circle cx="7.5" cy="13.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/></svg><span id="mycarTxt">حدد سيارتك</span></button>
+ <a class="ibtn hide-s" href="/order">تتبّع طلبي</a>
+ <button class="ibtn" type="button" id="opencart" aria-label="السلة"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/></svg><span class="hide-s">السلة</span><b id="cn" data-n="0">0</b></button>
+</div></header>
+
+<!-- HOME -->
+<div id="homeView">
+<section class="hero"><div class="wrap">
+ <h1>قطعة سيارتك، بدون ما تعرف رقمها</h1>
+ <p class="sub">قطع هونداي وكيا الأصلية والبديلة. أدخل رقم الهيكل من الاستمارة، ونعرض لك القطع اللي تركب على سيارتك فقط، مع مقارنة الأنواع بالسعر.</p>
+ <div class="finder" id="finder">
+  <div class="ftabs" role="tablist">
+   <button class="ftab" role="tab" type="button" data-tab="vin" aria-selected="true">برقم الهيكل <small>الأدق</small></button>
+   <button class="ftab" role="tab" type="button" data-tab="car" aria-selected="false">بالسيارة</button>
+   <button class="ftab" role="tab" type="button" data-tab="pn" aria-selected="false">برقم القطعة</button>
+  </div>
+  <div class="fpane" id="pane-vin">
+   <label class="field"><em>VIN</em><input class="vinin" id="vin" maxlength="17" placeholder="KMHxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false" aria-label="رقم الهيكل"></label>
+   <div class="vinmap" id="vinmap" aria-hidden="true"></div>
+   <div class="vinlegend"><span><i style="background:var(--brand-soft)"></i>الشركة المصنّعة</span><span><i style="background:var(--ink)"></i>سنة الصنع</span><span>17 خانة · بدون الحروف I و O و Q</span></div>
+   <div class="vinres" id="vinres"></div>
+   <p class="where">تجده في الاستمارة تحت «رقم الهيكل»، أو أسفل الزجاج الأمامي من جهة السائق.</p>
+  </div>
+  <div class="fpane" id="pane-car" hidden>
+   <div class="frow">
+    <label class="field"><em>1</em><select id="sMake" aria-label="الشركة"><option value="">الشركة</option><option>هونداي</option><option>كيا</option></select></label>
+    <label class="field"><em>2</em><select id="sCar" aria-label="السيارة" disabled><option value="">اختر الشركة أولاً</option></select></label>
+    <label class="field"><em>3</em><select id="sYr" aria-label="السنة" disabled><option value="">اختر السيارة أولاً</option></select></label>
+   </div>
+   <button class="btn pri" type="button" id="goCar">اعرض قطع سيارتي</button>
+  </div>
+  <div class="fpane" id="pane-pn" hidden>
+   <label class="field"><em>#</em><input id="pnIn" class="ltr" style="text-align:left;font-family:var(--f-mono)" placeholder="58101-F2A00" autocomplete="off" aria-label="رقم القطعة"></label>
+   <button class="btn pri" type="button" id="goPn">ابحث بالرقم</button>
+  </div>
+  <div class="assure-row">
+   <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>نتحقق من التوافق قبل الشحن</span>
+   <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>وكالة وموبس وبدائل بأسعار واضحة</span>
+   <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>بائع يرد عليك على واتساب</span>
+  </div>
+ </div>
+ <div class="stats"><div><b id="stItems">0</b><span>صنف</span></div><div><b id="stStock">0</b><span>متوفر الآن</span></div><div><b id="stCars">0</b><span>موديل</span></div><div><b>4</b><span>أنواع: وكالة إلى تجاري</span></div></div>
+</div></section>
+
+<section class="wrap sec">
+ <div class="trust">
+  <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><p><b>التوافق قبل الشحن</b><span>نطابق كل طلب مع رقم الهيكل في كتالوج الوكالة قبل ما نجهزه.</span></p></div>
+  <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><p><b>نوع القطعة واضح</b><span>وكالة، موبس، كوري أو تجاري. مكتوب على كل قطعة، وتقارن بينها بالسعر.</span></p></div>
+  <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h3"/></svg><p><b>رقم القطعة الأصلي</b><span>تقدر تطابقه مع القطعة القديمة أو مع فني الورشة قبل الشراء.</span></p></div>
+  <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg><p><b>بائع حقيقي يرد عليك</b><span>اسأل عن أي قطعة على واتساب قبل ما تطلب، بدون روبوت.</span></p></div>
+ </div>
+</section>
+<section class="wrap sec"><div class="sech"><h2>كيف تطلب قطعتك</h2><span>3 خطوات، بدون ما تعرف رقم القطعة</span></div>
+ <ol class="steps">
+  <li><b>١</b><div><h3>أدخل رقم الهيكل</h3><p>من الاستمارة. نعرف منه سيارتك وسنتها وجيلها، ونعرض القطع اللي تركب عليها فقط.</p></div></li>
+  <li><b>٢</b><div><h3>اختر القطعة وقارن</h3><p>كل قطعة تظهر بأنواعها وأسعارها جنب بعض: الأصلي والأوفر، وتختار اللي يناسبك.</p></div></li>
+  <li><b>٣</b><div><h3>نأكد ونرسل</h3><p>يوصلنا طلبك مع رقم الهيكل، نتأكد من التوافق ونرد عليك بالسعر النهائي قبل الدفع.</p></div></li>
+ </ol>
+</section>
+<section class="wrap sec"><div class="sech"><h2>ابدأ من قسم</h2><span>كل قطع هونداي وكيا</span></div><div class="cats" id="homeCats"></div></section>
+<section class="wrap sec"><div class="sech"><h2>الأكثر طلباً</h2><span>متوفرة الآن</span></div><div class="grid" id="popGrid"></div></section>
+</div>
+
+<!-- CATALOG (all parts, or one car's parts) -->
+<div id="catView" hidden>
+ <section class="garage" id="garage"></section>
+ <main class="wrap">
+  <div class="sec" style="padding-top:18px"><div class="cats" id="cats" role="group" aria-label="الأقسام"></div></div>
+  <div class="tools"><div><span id="info"></span> <span class="fixed" id="fixed"></span></div><div class="r"><label class="sw"><input type="checkbox" id="avOnly">المتوفر فقط</label><select id="sort" aria-label="الترتيب"><option value="">الأنسب</option><option value="lo">الأقل سعراً</option><option value="hi">الأعلى سعراً</option></select></div></div>
+  <div class="grid" id="grid"></div>
+  <div class="more"><button class="btn" id="moreBtn" type="button" hidden>عرض المزيد</button></div>
+ </main>
+</div>
+
+<section class="band" id="help"><div class="wrap">
+ <div>
+  <h2>ما لقيت قطعتك؟</h2>
+  <p class="lead">أرسل لنا وصفها وصورة الاستمارة، ونحدد لك القطعة الصحيحة من كتالوج الوكالة.</p>
+  <ol class="how">
+   <li><b>1</b><span>اكتب وصفاً بسيطاً، مثل «الضوء الخلفي اليمين» أو «صوت من الأمام عند المطبات».</span></li>
+   <li><b>2</b><span>اضغط الزر، وأرفق في المحادثة صورة الاستمارة أو صورة القطعة القديمة.</span></li>
+   <li><b>3</b><span>نرد عليك برقم القطعة والسعر والتوفر.</span></li>
+  </ol>
+  <form class="form" id="helpForm">
+   <input id="hCar" placeholder="السيارة والسنة، مثل: النترا 2021" autocomplete="off">
+   <textarea id="hDesc" placeholder="وش القطعة اللي تحتاجها؟"></textarea>
+   <button class="btn wa" type="submit">أرسل الطلب على واتساب</button>
+  </form>
+ </div>
+ <div>
+  <h2>وش الفرق بين الأنواع؟</h2>
+  <p class="lead">نفس القطعة تجيك بأكثر من نوع وسعر. في صفحة كل قطعة نعرض المتوفر منها جنب بعض.</p>
+  <div class="types">
+   <div><span class="ty a">وكالة</span><p><b>أصلية من الوكيل.</b> نفس القطعة اللي طلعت مع السيارة من المصنع، وسعرها الأعلى.</p></div>
+   <div><span class="ty m">موبس</span><p><b>أصلية من موبيس.</b> المصنّع الرسمي لقطع هيونداي وكيا، بجودة الوكالة وسعر أقل غالباً.</p></div>
+   <div><span class="ty k">كوري</span><p><b>صناعة كورية</b> من مصانع خارج الوكالة. توازن بين الجودة والسعر.</p></div>
+   <div><span class="ty c">تجاري</span><p><b>بديل اقتصادي.</b> مناسب لمن يبغى أقل تكلفة.</p></div>
+  </div>
+ </div>
+</div></section>
+<section class="wrap sec"><div class="sech"><h2>أسئلة قبل الشراء</h2></div>
+ <div class="faq">
+  <details><summary>كيف أتأكد إن القطعة تركب على سيارتي؟</summary><p>أدخل رقم الهيكل، ونعرض لك القطع المسجلة لسيارتك وجيلها فقط. القطع المكتوب عليها «مطابقة» يطابق رمزها أو سنواتها سيارتك. وبعد الطلب نراجع رقم الهيكل في كتالوج الوكالة قبل التجهيز، وإذا فيه اختلاف نتواصل معك.</p></details>
+  <details><summary>وين ألقى رقم الهيكل؟</summary><p>في استمارة السيارة تحت «رقم الهيكل»، وهو 17 خانة من حروف وأرقام. وتلقاه بعد أسفل الزجاج الأمامي من جهة السائق.</p></details>
+  <details><summary>أي نوع أختار: وكالة أو موبس أو تجاري؟</summary><p>الوكالة والموبس أصليتان، والفرق غالباً في السعر. الكوري توازن بين الجودة والسعر، والتجاري أقل تكلفة. في صفحة كل قطعة تشوف الأنواع المتوفرة وأسعارها جنب بعض.</p></details>
+  <details><summary>القطعة مكتوب عليها «غير متوفر حالياً»، أقدر أطلبها؟</summary><p>نعم. أضفها للسلة واطلبها، ونرد عليك بموعد توفيرها وسعرها قبل أي دفع.</p></details>
+  <details><summary>الأسعار نهائية؟</summary><p>الأسعار المعروضة تقريبية بالريال السعودي. نأكد معك السعر النهائي عند تأكيد التوافق وقبل الدفع.</p></details>
+ </div>
+</section>
+<footer class="wrap" id="foot"></footer>
+</div>
+
+<div class="checkout" id="checkout" hidden dir="rtl"><div class="in2"><div><b id="coTotal">0</b><small id="coCount"></small></div><button class="btn pri" type="button" id="coBtn">إتمام الطلب</button></div></div>
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" hidden dir="rtl" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+ <div class="dh"><h2 id="shTitle">تفاصيل القطعة</h2><button class="x" type="button" data-close aria-label="إغلاق"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+ <div class="db" id="shBody"></div>
+ <div class="df"><div class="dfrow" id="shBuy"></div></div>
+</section>
+<aside class="drawer" id="drawer" hidden dir="rtl" role="dialog" aria-modal="true" aria-label="سلة الطلب">
+ <div class="dh"><h2>سلة الطلب</h2><button class="x" type="button" data-close aria-label="إغلاق"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+ <div class="db" id="items"></div>
+ <div class="df" id="cartfoot">
+  <div class="tot">الإجمالي <span id="total">0</span></div>
+  <p class="hint">رسوم الشحن تظهر في الخطوة التالية حسب مدينتك.</p>
+  <button class="btn pri" id="send" type="button" style="padding:13px">إتمام الطلب</button>
+  <p class="hint">ندفع إلكترونياً بمدى أو Apple Pay أو البطاقة، أو عند الاستلام إذا كان متاحاً.</p>
+ </div>
+</aside>
+<div id="toast" role="status"></div>
+<script src="/assets/common.js"></script>
+<script src="/assets/store.js"></script>
+</body>
+</html>
