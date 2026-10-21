@@ -124,7 +124,7 @@ function catTile(k,l,n,on,attr){return `<button class="cat" type="button" ${attr
 function render(){const b=matchQ(base());const cc={};b.forEach(d=>cc[d.g]=(cc[d.g]||0)+1);if(S.cat&&!cc[S.cat])S.cat="";
  $("#cats").innerHTML=catTile("","كل الأقسام",b.length,!S.cat,"data-cat")+CATS.map(([k,l])=>catTile(k,l,cc[k]||0,S.cat===k,"data-cat")).join("");
  let r=S.cat?b.filter(d=>d.g===S.cat):b;const ps=d=>price(d)||(S.sort==="lo"?1e9:-1);
- r=r.slice().sort(S.sort==="lo"?(x,y)=>ps(x)-ps(y):S.sort==="hi"?(x,y)=>ps(y)-ps(x):(x,y)=>(fitLevel(y)-fitLevel(x))||((y.q>0)-(x.q>0))||((!!y.w)-(!!x.w)));
+ r=r.slice().sort(S.sort==="lo"?(x,y)=>ps(x)-ps(y):S.sort==="hi"?(x,y)=>ps(y)-ps(x):(x,y)=>(fitLevel(y)-fitLevel(x))||((y.q>0)-(x.q>0))||((!!y.pr)-(!!x.pr)));
  res=r;lim=24;$("#fixed").innerHTML=fixedTo?`· نعرض نتائج <b>${esc(fixedTo)}</b>`:"";draw()}
 const agencyPrice=d=>{const a=GRP[d.b].find(x=>x.ty==="a"&&price(x));return a?price(a):0};
 const saveTxt=d=>{if(d.ty==="a")return"";const a=agencyPrice(d),p=price(d);return a&&p&&p<a?`أوفر من الوكالة بـ ${fmt(a-p)} ر.س`:""};
@@ -149,7 +149,7 @@ $("#sort").addEventListener("change",e=>{S.sort=e.target.value;render()});
 /* home */
 function drawHome(){const cc={};P.forEach(d=>cc[d.g]=(cc[d.g]||0)+1);
  $("#homeCats").innerHTML=CATS.map(([k,l])=>catTile(k,l,cc[k]||0,false,"data-hcat")).join("");
- const seen=new Set(),pop=[];for(const d of P.filter(d=>d.q===2&&d.w&&d.c.length).sort((a,b)=>b.c.length-a.c.length)){if(seen.has(d.g)&&pop.length<6)continue;seen.add(d.g);pop.push(d);if(pop.length>=8)break}
+ const seen=new Set(),pop=[];for(const d of P.filter(d=>d.q===2&&d.pr&&d.c.length).sort((a,b)=>b.c.length-a.c.length)){if(seen.has(d.g)&&pop.length<6)continue;seen.add(d.g);pop.push(d);if(pop.length>=8)break}
  $("#popGrid").innerHTML=pop.map(card).join("")}
 $("#homeCats").addEventListener("click",e=>{const b=e.target.closest("[data-hcat]");if(!b)return;$("#q").value="";S.cat="";showView("cat");drawGarage();S.cat=b.dataset.hcat;render()});
 
